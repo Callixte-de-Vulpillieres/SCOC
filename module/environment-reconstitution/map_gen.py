@@ -35,10 +35,16 @@ class LaserScan:
 
 
 class Map :
-    def __init__(self, x_size, y_size) -> None:
+    def __init__(self, x_size, y_size,step,seuil) -> None:
         self.x_size = x_size
         self.y_size = y_size
-
+        self.step= step
+        self.seuil=seuil
+    def discrete(self) -> None:
+        res=np.array([[0]*self.x_size for i in range(self.y_size)])
+        for point in map:
+            res[int(point[0]//self.step),int(point[1]//self.step)]+=1
+        return (2*res//self.seuil).astype(bool)
 
 class DraftMap :
     points = [] 
@@ -49,7 +55,7 @@ class DraftMap :
     def draw(self, x, y) -> None:
         self.points.append(geometry.Point2D(x,y))
     
-    def show(self) :
+    def ___repr__ (self) :
         plt.scatter([point.x for point in self.points], [point.y for point in self.points])
         plt.show()
 
