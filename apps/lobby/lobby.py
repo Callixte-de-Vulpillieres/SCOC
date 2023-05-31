@@ -17,6 +17,18 @@ parser.add_argument("bots",
                     help="CSV file describing position of each bot",
                     )
 
+parser.add_argument("x_max",
+                    type=int,
+                    )
+
+parser.add_argument("y_max",
+                    type=int,
+                    )
+
+parser.add_argument("duration",
+                    type=int,
+                    )
+
 parser.add_argument('--connect', '-e', dest='connect',
                     metavar='ENDPOINT',
                     action='append',
@@ -24,14 +36,20 @@ parser.add_argument('--connect', '-e', dest='connect',
                     help='Endpoints to connect to.')
 
 args = parser.parse_args()
-conf = zenoh.Config.from_file(zenoh.Config())
+conf = zenoh.Config()
 conf.insert_json5(zenoh.config.MODE_KEY, json.dumps("client"))
 conf.insert_json5(zenoh.config.CONNECT_KEY, json.dumps(args.connect))
 key = "lobby"
 
-bots = csv.DictReader(args.bots)
-bots_presents = {}
-
+bots_CSV = csv.DictReader(args.bots)
+bots=[]
+for bot in bots_CSV :
+    if "x" in bot and "y" in bot and "angle" in bot and "id" in bot :
+        bots.append({"id" : bot["id"], "x" : int(bot["x"]), "y" : int(bot["y"]), "angle" : float(bot["angle"]), "x_max" : int(args.x_max), "y_max" : int(args.y_max)})
+    else :
+        parser.error("invalid CSV file")
+bots_presents = set()
+print(bots)
 mouses = {}
 cat = None
 
@@ -41,22 +59,24 @@ zenoh.init_logger()
 print("Opening session...")
 session = zenoh.open(conf)
 
-def listener(sample: Sample):
+def listener_lobby(sample: Sample):
     global bots, mouses, cat
-    if sample.encoding == Encoding.APP_JSON :
-        message = json.load(sample.payload)
-        if message["type"] == "bot" :
-            bots_presents.add(message["id"])
-        if message["type"] == "mouse" :
-            mouses.add(message["id"])
-        if message["type"] == "cat" :
-            cat = message["id"]
+    #if sample.encoding == Encoding.APP_JSON :
+    message = json.loads(sample.payload.decode())
+    if message["type"] == "bot" :
+        bots_presents.add(message["id"])
+    if message["type"] == "mouse" :
+        mouses.add(message["id"])
+    if message["type"] == "cat" :
+        cat = message["id"]
 
-sub = session.declare_subscriber(key, listener, reliability=Reliability.RELIABLE())
+sub = session.declare_subscriber(key, listener_lobby, reliability=Reliability.RELIABLE())
 
 print("Waiting for all bots and controllers to connect...")
-while len(mouses) + 1 != len(bots) and len(bots_presents) != len(bots) and cat is not None :
+while len(mouses) + 1 != len(bots) or len(bots_presents) != len(bots) or cat is None :
     time.sleep(1)
+
+sub.undeclare()
 
 print("All participants connected !")
 bots_presents = list(bots_presents)
@@ -66,27 +86,32 @@ cat_bot = bots.pop()
 
 # Declare cat
 pub = session.declare_publisher("bot/"+cat_bot["id"]+"/handshake")
-pub.put(cat,Encoding.TEXT_PLAIN)
+pub.put(cat)
 pub.undeclare()
 pub = session.declare_publisher("controller/" + cat + "/handshake")
-jsn = json.dump(cat_bot)
-pub.put(jsn,Encoding.APP_JSON)
+jsn = json.dumps(cat_bot)
+pub.put(jsn.encode())
 pub.undeclare()
 
-for i in range(bots) :
+for i in range(len(bots)) :
     pub = session.declare_publisher("bot/" + bots[i]["id"] + "/handshake")
-    pub.put(mouses[i]["id"],Encoding.TEXT_PLAIN)
+    pub.put(mouses[i]["id"])
     pub.undeclare()
     pub = session.declare_publisher("controller/" + mouses[i]["id"] + "/handshake")
-    jsn = json.dump(bots[i])
-    pub.put(jsn,Encoding.APP_JSON)
+    jsn = json.dumps(bots[i])
+    pub.put(jsn.encode())
     pub.undeclare()
 
+
 pub = session.declare_publisher("controller")
-pub.put("Starting game !")
+print("Beginning of hiding phase for " + str(args.duration) + " seconds")
+pub.put(args.duration)
+pub.put("Hiding phase")
+time.sleep(args.duration)
+print("Seeking phase")
+pub.put("Seeking phase")
 
 
 
 
-sub.undeclare()
 session.close()
