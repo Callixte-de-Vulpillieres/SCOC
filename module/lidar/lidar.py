@@ -7,6 +7,10 @@ import math
 from matplotlib import pyplot as plt
 import numpy as np
 import time
+import sys
+
+sys.apth.insert(0,'..')
+from module.commands.controller import Controller
 
 @cdr
 class Time:
@@ -33,13 +37,6 @@ class LaserScan:
     ranges: array[float32, 360]
     intensities: array[float32, 360]
 
-
-class Map :
-    def __init__(self, x_size, y_size) -> None:
-        self.x_size = x_size
-        self.y_size = y_size
-
-
 class DraftMap :
     points = [] 
     def __init__(self, x_size, y_size) -> None:
@@ -55,22 +52,21 @@ class DraftMap :
 
 class Lidar :
     angles = []
+    parent : Controller
 
-    def __init__(self, angles : list, draft_map : DraftMap, threshold : float = 10) -> None:
-        self.angles = angles
+    def __init__(self, dim : tuple, threshold : float = 10) -> None:
+        self.angles = np.linspace(-math.pi/2, 3*math.pi/2 - 2*math.pi/360, 360)
         self.threshold = threshold
-        self.draft_map = draft_map
+        self.draft_map = DraftMap()
 
     def handle(self, sample) :
         # print("Scanning")
         # print('[DEBUG] Received frame: {}'.format(sample.key_expr))
         scan = LaserScan.deserialize(sample.payload)
         for (angle, distance, intensity) in zip(self.angles, scan.ranges, scan.intensities) :
-            #print(angle, self.bot.get_angle(), self.bot.get_pos())
             if intensity > self.threshold :
-                self.draft_map.draw(math.cos(angle + self.bot.get_angle())*distance + self.bot.get_pos()[0], math.sin(angle + self.bot.get_angle()) * distance + self.bot.get_pos()[1])
+                self.draft_map.draw(math.cos(angle + self.parent.get_angle())*distance + self.parent.get_x() , math.sin(angle + self.parent.get_angle()) * distance + self.parent.get_y())
         #self.draft_map.show()
-        print("Top")
 
 
 
