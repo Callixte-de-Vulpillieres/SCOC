@@ -73,7 +73,7 @@ class Bot :
         ## Run zlidar
         print("[INFO] Starting zlidar")
         lidar_publisher_key = "bot/{}/lidar".format(self.uid)
-        os.system("sh \"{} -e {} -k {}\"".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
+        os.system("sh {} -e {} -k {}".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
 
         # Init subscribers
         cmd = zenoh
@@ -84,16 +84,11 @@ class Bot :
         print("[INFO] Connected ! Assigned to controller {}".format(self.controller))
 
     def handshake_controller_handler(self, sample : Sample) :
-        print(sample.payload.decode())
-        try :
-            response = json.loads(sample.payload.decode())
-            self.angular_vel = response["angular_vel"]
-            self.linear_vel = response["linear_vel"]
-            self.controller_connected = True
-            print("[INFO] Successfully connected to controller {}".format(self.controller))
-        except :
-            print("[ERROR] {}".format(sample.payload.decode()))
-            sys.exit(1)
+        response = json.loads(sample.payload.decode())
+        self.angular_vel = response["angular_vel"]
+        self.linear_vel = response["linear_vel"]
+        self.controller_connected = True
+        print("[INFO] Successfully connected to controller {}".format(self.controller))
 
     ## Getters
     def get_pos(self) -> geometry.Point2D :

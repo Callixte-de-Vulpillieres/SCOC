@@ -78,7 +78,9 @@ class Controller :
         self.lidar = Lidar(DIM)
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
-    
+        while True :
+            time.sleep(1)
+
     ## Handlers
     def handle_instruction(self, sample : Sample) :
         message = sample.payload.decode()
