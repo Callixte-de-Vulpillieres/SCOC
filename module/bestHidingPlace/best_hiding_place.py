@@ -33,6 +33,7 @@ def affichaget(L):
             res=res+str(L[i,j])+' ; '
         res+='\n'
     print(res)
+
 def visible_2_points(case_depart,case_arrivee,dens,seuil=1):
     if case_depart[0] != case_arrivee[0]:
         pente = (case_arrivee[1] - case_depart[1]) / (case_arrivee[0] - case_depart[0])
@@ -72,7 +73,7 @@ def visible(map, point,grille, range_scan,seuil,nombre_points):
             score+=1
     return score/nombre_points
 def score_cachette(map, point,grille, range_scan,seuil,nombre_points,taille):
-    # if acccessible
+    # if acccessible : 
     for pt in map:
         if (pt[0]-point[0])**2+(pt[1]-point[1])**2<taille:
             return 0
@@ -80,6 +81,28 @@ def score_cachette(map, point,grille, range_scan,seuil,nombre_points,taille):
         return visible(map, point,grille, range_scan,seuil,nombre_points)
 def min_score(t,origine,tau):
     return origine*np.exp(-t/tau)
-def decidemove(time,best_score,position, scanning_range,step):
-    # TODO
-    pass
+def simplify(grid,factor,centre, radius):
+    a,b=grid.shape
+    res=[]
+    for i in range(max(0,centre[0]-radius),min(b,centre[0]+radius),factor):
+        for j in range(max(0,centre[1]-radius),min(b,centre[1]+radius),factor):
+            res.append((i,j))
+    return res
+print(simplify(np.zeros([10,10]),2,(4,2),6))
+
+def decidemove(map, time, origin, tau ,position, nombre_points, seuil, densite, grille, scanning_range, score, factor=1, best_score=0):
+    if best_score > min_score(time, origin, tau):
+        # Chemin vers best_score
+        print("Moving to best found place :" + score[0])
+    else:
+        for point in simplify(densite, factor, position, scanning_range):
+            dejavu=False
+            for elt in score:
+                if elt[1:] == point:
+                    elt[0]=score_cachette(map, point, grille, range_scan, seuil, nombre_points)
+                    dejavu=True
+                    break
+            if not dejavu:
+                score.append([score_cachette(map, point, grille, range_scan, seuil, nombre_points)]+point)
+        score.sort()
+        # Renvoyer chemin vers le score[-1][1:]

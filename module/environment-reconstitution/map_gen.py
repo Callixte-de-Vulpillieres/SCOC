@@ -7,7 +7,7 @@ import math
 from matplotlib import pyplot as plt
 import numpy as np
 import time
-
+from ..bestHidingPlace import best_hiding_place
 @cdr
 class Time:
     sec: uint32
@@ -62,6 +62,7 @@ class DraftMap :
 class Bot :
     angle = 0
     position = (0,0)
+    hiding_places=[]
     def __init__(self) -> None:
         pass
 
@@ -70,7 +71,9 @@ class Bot :
 
     def get_angle(self) -> float :
         return self.angle
-
+    
+    def get_hiding_places(self) -> list:
+        return self.hiding_places
 
 
 class Lidar :
