@@ -127,6 +127,11 @@ def pub_twist(linear, angular):
                 angular=Vector3(x=0.0, y=0.0, z=angular))
     session.put(cmd_vel, t.serialize())
 
-path = astar(map.)
+goal = (x,y)
+
+path = astar(map.discrete(),bot.position,goal)
+moves = [path[i+1]-path[i] for i in range(len(path)-1)]
+
+bot.move_path(moves)
 
 
