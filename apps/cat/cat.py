@@ -1,40 +1,34 @@
 
-from qrcode_scanner import *
-from commands import *
+import time
+import cv2
 import sys
+import os 
 
 # setting path
-sys.path.append('.../module/bot-recognition/qrcode_recognition')
-sys.path.append('.../module/commands')
+qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
+sys.path.append(qrcode_recognition_path)
 
+from qrcode_scanner import *
 
 searching = True
-nb_bots_found = 0
-nb_bots = 1
+bots_found = []
+nb_bots = 5
 
-map = commands.getmap()  # ??
-
+cam = cv2.VideoCapture(0)
+cam.set(3, 640)
+cam.set(4, 480)
+fps = 5
 
 while searching:
-    # cherche un point au hazrd dans les zones dispos
-    # se dirige vers cette zone
-
-    # cherche un bot
-    res, bot = scan_environment()
-    if res == True:
-        bot_found(bot)
-
-# play victory sound
-
-
-def scan_environment():
-    # se tourne pour voir s'il y a des robots dans la zone
-
-
-def scan_ligne():
-    # se deplace jusqu'a l'obstacle le plus proche a gauche / a droite
-
-
-def bot_found():
-    # reconnait le robot
-    # envoie l id au lobby?
+    # scan les qrcodes
+    success, res = recognition(cam)
+    if success:
+        for bot in res:
+            if bot not in bots_found:
+                bots_found.append(bot)
+                if len(bots_found) >= nb_bots:
+                    searching = False
+                    print("I win!")
+                    cam.release()
+    time.sleep(1/fps)
+    print(bots_found)
