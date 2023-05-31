@@ -56,12 +56,12 @@ class Bot :
 
         ## Connect to controller
         controller_waiting_room = self.session.declare_publisher("controller/" + self.controller)
-        handshake_controller = self.session.declare_subscriber("controller/" + self.uid + "/peer/handshake", self.handshake_controller_handler)
+        handshake_controller = self.session.declare_subscriber("controller/" + self.controller + "/peer/handshake", self.handshake_controller_handler)
         while not self.controller_connected :
             print("[INFO] Reaching controller")
             controller_waiting_room.put(self.uid)
             time.sleep(1)
-            
+
         controller_waiting_room.delete()
         handshake_controller.undeclare()
         
