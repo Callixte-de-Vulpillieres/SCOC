@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 from math import cos,sin
 from datetime import datetime
 import argparse
@@ -53,6 +54,7 @@ class bot:
     def move_path(self,path):
         for el in path:
             self.move(el[0],el[1])
+            sleep(1000)
 
 
 
