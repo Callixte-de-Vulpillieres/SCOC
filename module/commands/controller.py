@@ -31,7 +31,7 @@ class Controller :
 
     lidar : lidar.lidar.Lidar
 
-    info : dict
+    info : dict = {}
 
     def __init__(self, uid : str) -> None:
         self.uid = uid
@@ -75,7 +75,7 @@ class Controller :
         print("[INFO] Starting subscribers")
         self.ins_count = 0
         lobby_instruction_subscriber = self.session.declare_subscriber("controller", self.handle_instruction)
-        self.lidar = lidar.Lidar(DIM)
+        self.lidar = Lidar(DIM)
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
     
