@@ -7,7 +7,7 @@ import zenoh
 import json
 from pycdr import cdr
 from pycdr.types import int8, int32, uint32, float64
-from astar.py import *
+from astar import *
 
 class Vector3:
     x: float64
@@ -35,8 +35,64 @@ class bot:
     position: Vector3
     orientation: float64
 
+    def __init__(self,start_coord,angle):
+        bot.position = start_coord
+        bot.orientation = angle
+
+    def move(self,direction,length):
+        currentAngle = self.orientation()
+        pub_twist((direction - currentAngle) * angular_scale, 0.0)
+        pub_twist(0.0, length * linear_scale)
+        self.position.x=self.position.x + length * cos(direction)
+        self.position.y=self.position.y + length * cos(direction)
 
 
+    def getposition(self):
+        return self.position()
+
+    def move_path(self,path):
+        for el in path:
+            self.move(el[0],el[1])
+
+
+
+parser = argparse.ArgumentParser(
+    prog='ros2-teleop',
+    description='zenoh ros2 teleop example')
+parser.add_argument('--mode', '-m', dest='mode',
+                    choices=['peer', 'client'],
+                    type=str,
+                    help='The zenoh session mode.')
+parser.add_argument('--connect', '-e', dest='connect',
+                    metavar='ENDPOINT',
+                    action='append',
+                    type=str,
+                    help='zenoh endpoints to connect to.')
+parser.add_argument('--listen', '-l', dest='listen',
+                    metavar='ENDPOINT',
+                    action='append',
+                    type=str,
+                    help='zenoh endpoints to listen on.')
+parser.add_argument('--config', '-c', dest='config',
+                    metavar='FILE',
+                    type=str,
+                    help='A configuration file.')
+parser.add_argument('--cmd_vel', dest='cmd_vel',
+                    default='rt/turtle1/cmd_vel',
+                    type=str,
+                    help='The "cmd_vel" ROS2 topic.')
+parser.add_argument('--rosout', dest='rosout',
+                    default='rt/rosout',
+                    type=str,
+                    help='The "rosout" ROS2 topic.')
+parser.add_argument('--angular_scale', '-a', dest='angular_scale',
+                    default='2.0',
+                    type=float,
+                    help='The angular scale.')
+parser.add_argument('--linear_scale', '-x', dest='linear_scale',
+                    default='2.0',
+                    type=float,
+                    help='The linear scale.')
 
 args = parser.parse_args()
 conf = zenoh.config_from_file(args.config) if args.config is not None else zenoh.Config()
@@ -71,14 +127,6 @@ def pub_twist(linear, angular):
                 angular=Vector3(x=0.0, y=0.0, z=angular))
     session.put(cmd_vel, t.serialize())
 
-
-def move(self,direction,length):
-    currentAngle=self.orientation()
-    pub_twist((direction - currrentAngle) * angular_scale, 0.0)
-    pub_twist(0.0, length * linear_scale)
-    self.position.x=self.position.x + length * cos(direction)
-    self.position.y=self.position.y + length * cos(direction)
+path = astar(map.)
 
 
-def getposition(self):
-    return self.position()
