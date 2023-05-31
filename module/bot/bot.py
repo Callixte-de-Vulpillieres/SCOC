@@ -22,11 +22,12 @@ class Bot :
     angular_vel : str
     linear_vel : str
 
-    def __init__(self, cmd_key : str, linar_cmd : str) -> None:
-        self.cmd_key = cmd_key
+    def __init__(self, uid : str) -> None:
+        self.cmd_subscriber_key = "bot/{}/cmd_vel".format(uid)
         self.lobby_connected = False
         self.controller_connected = False
         self.controller = ""
+        self.uid = uid
 
         # Init conf
         zenoh.init_logger()
@@ -62,8 +63,7 @@ class Bot :
         
         ## Run zturtle, cam is at bot/id/cams/0
         print("[INFO] Starting Zturtle")
-        cmd_subsciber_key = "bot/{}".format(self.uid)
-        os.system("python3 {} -k {} -e {} -a {} -l {}".format(ZTURTLE_PATH, cmd_subsciber_key, ROUTER_ADDRESS, self.angular_vel, self.linear_vel))
+        os.system("python3 {} -k {} -e {} -a {} -l {}".format(ZTURTLE_PATH, self.cmd_subsciber_key, ROUTER_ADDRESS, self.angular_vel, self.linear_vel))
 
         ## Run zlidar
         print("[INFO] Starting zlidar")
@@ -99,3 +99,5 @@ class Bot :
         return self.angle
     
     
+if __name__ == "__main__" :
+    bot = Bot("1")

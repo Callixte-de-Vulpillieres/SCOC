@@ -96,6 +96,7 @@ class Controller :
         pass
 
     ## Treatements
+    
 
     ## Getters
     def get_x(self) -> float :
