@@ -116,11 +116,13 @@ def listener_game(sample: Sample) :
     print("Robot " + sample.payload + " has been found")
 sub = session.declare_subscriber(key, listener_game, reliability=Reliability.RELIABLE())
 print("Seeking phase")
+deb = time.time()
 pub.put("Seeking phase")
 
 
 while len(losers) != len(bots) :
     time.sleep(1)
+print("Bot " + cat_bot["id"] + "has won in " + time.time() - deb)
 print("Bot " + losers[-1] + "has won !")
 
 pub.undeclare()
