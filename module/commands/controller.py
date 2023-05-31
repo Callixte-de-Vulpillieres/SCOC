@@ -30,11 +30,11 @@ class Controller :
     bot : str
 
     lidar : lidar.lidar.Lidar
-
     info : dict = {}
 
-    def __init__(self, uid : str) -> None:
+    def __init__(self, uid : str, role : str) -> None:
         self.uid = uid
+        self.type = role
 
         # Init conf
         zenoh.init_logger()
@@ -51,7 +51,7 @@ class Controller :
         handshake_lobby = self.session.declare_subscriber("controller/" + self.uid + "/handshake", self.handshake_lobby_handler)
 
         ## Generate id card
-        id_card = {"id" : self.uid, "type" : "cat"}
+        id_card = {"id" : self.uid, "type" : self.type}
         id_card_json = json.dumps(id_card, indent=4)
 
         ## Send heartbeat until response of lobby
@@ -88,8 +88,9 @@ class Controller :
             self.info["duration"] = message
             print(self.info["duration"])
             self.ins_count += 1
-        elif message == "Hidding phase" :
-            print("Starting")
+        if message == "Hiding phase" :
+            print("[INFO] Starting")
+        
 
 
     ## Protocol methods
@@ -127,4 +128,4 @@ class Controller :
         return self.slave_angle
 
 if __name__ == "__main__" :
-    c = Controller("2")
+    c = Controller("2", "cat")
