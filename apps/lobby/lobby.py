@@ -49,7 +49,6 @@ for bot in bots_CSV :
     else :
         parser.error("invalid CSV file")
 bots_presents = set()
-print(bots)
 mouses = {}
 cat = None
 
@@ -104,6 +103,7 @@ for i in range(len(bots)) :
 
 
 pub = session.declare_publisher("controller")
+time.sleep(5)
 print("Beginning of hiding phase for " + str(args.duration) + " seconds")
 pub.put(args.duration)
 pub.put("Hiding phase")
