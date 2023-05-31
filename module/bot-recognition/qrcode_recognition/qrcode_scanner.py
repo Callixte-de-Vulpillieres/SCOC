@@ -5,21 +5,23 @@ import time
 cam = cv2.VideoCapture(0)
 cam.set(3, 640)
 cam.set(4, 480)
+fps = 10  # frame per second
 
-camera = True
-while camera:
-    success, frame = cam.read()
 
-    for barcode in decode(frame):
-        barcode_data = barcode.data.decode('utf-8')
-        barcode_type = barcode.type
-        print("Barcode Data:", barcode_data)
+def recognition():
+    camera = True
+    while camera:
+        success, frame = cam.read()
 
-    cv2.imshow("QR Code Scanner", frame)
+        for barcode in decode(frame):
+            barcode_data = barcode.data.decode('utf-8')
+            barcode_type = barcode.type
+            print("Barcode Data:", barcode_data)
 
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    time.sleep(1/10)
+        cv2.imshow("QR Code Scanner", frame)
 
-cam.release()
-cv2.destroyAllWindows()
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        time.sleep(1/fps)
+    cam.release()
+    cv2.destroyAllWindows()
