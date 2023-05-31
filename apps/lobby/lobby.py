@@ -49,7 +49,7 @@ for bot in bots_CSV :
     else :
         parser.error("invalid CSV file")
 bots_presents = set()
-mouses = {}
+mouses = set()
 cat = None
 
 # initiate logging
@@ -94,9 +94,9 @@ pub.undeclare()
 
 for i in range(len(bots)) :
     pub = session.declare_publisher("bot/" + bots[i]["id"] + "/handshake")
-    pub.put(mouses[i]["id"])
+    pub.put(mouses[i])
     pub.undeclare()
-    pub = session.declare_publisher("controller/" + mouses[i]["id"] + "/handshake")
+    pub = session.declare_publisher("controller/" + mouses[i] + "/handshake")
     jsn = json.dumps(bots[i])
     pub.put(jsn.encode())
     pub.undeclare()
