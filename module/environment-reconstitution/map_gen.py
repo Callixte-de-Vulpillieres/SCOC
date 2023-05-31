@@ -53,18 +53,6 @@ class DraftMap :
         plt.scatter([point.x for point in self.points], [point.y for point in self.points])
         plt.show()
 
-class Bot :
-    angle = 0
-    position = (0,0)
-    def __init__(self) -> None:
-        pass
-
-    def get_pos(self) -> geometry.Point2D :
-        return self.position
-
-    def get_angle(self) -> float :
-        return self.angle
-
 
 
 class Lidar :
@@ -84,7 +72,7 @@ class Lidar :
         a = z.declare_subscriber(self.lidar_subscriber_key, self.handle)
 
     def handle(self, sample) :
-        #print("Scanning")
+        # print("Scanning")
         # print('[DEBUG] Received frame: {}'.format(sample.key_expr))
         scan = LaserScan.deserialize(sample.payload)
         for (angle, distance, intensity) in zip(self.angles, scan.ranges, scan.intensities) :
