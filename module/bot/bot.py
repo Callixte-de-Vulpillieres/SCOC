@@ -22,6 +22,7 @@ class Bot :
     angular_vel : str
     linear_vel : str
 
+
     def __init__(self, uid : str) -> None:
         self.cmd_subscriber_key = "bot/{}/cmd_vel".format(uid)
         self.lobby_connected = False
@@ -83,6 +84,7 @@ class Bot :
         print("[INFO] Connected ! Assigned to controller {}".format(self.controller))
 
     def handshake_controller_handler(self, sample : Sample) :
+        print(json.loads(sample.payload.decode()))
         try :
             response = json.loads(sample.payload.decode())
             self.angular_vel = response["angular_vel"]
