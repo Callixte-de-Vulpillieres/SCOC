@@ -53,7 +53,7 @@ class Controller :
 
         ## Send heartbeat until response of lobby
         while not self.lobby_connected :
-            lobby.put(id_card_json, Encoding.APP_JSON)
+            lobby.put(id_card_json.encode())
             time.sleep(1)
         lobby.delete()
 
@@ -76,17 +76,16 @@ class Controller :
 
     ## Protocol methods
     def handshake_lobby_handler(self, sample : Sample) :
-        if sample.encoding == Encoding.TEXT_PLAIN :
-            self.bot = sample.payload.decode()
-            self.lobby_connected = True
-            print("[INFO] Connected ! Assigned to bot {}".format(self.controller))
+        self.bot = sample.payload.decode()
+        self.lobby_connected = True
+        print("[INFO] Connected ! Assigned to bot {}".format(self.controller))
 
     def bot_connection_handler(self, sample: Sample) :
         if sample.payload.decode() == self.bot :
             print("[INFO] Connection requested from {}".format(self.bot))
             handshake_bot = self.session.declare_publisher("controller/{}/handshake".format(self.uid))
             payload = json.dumps(CONFIG, indent=4)
-            handshake_bot.put(payload, Encoding.APP_JSON)
+            handshake_bot.put(payload.encode())
             print("[INFO] Config sent to {}".format(self.bot))
             handshake_bot.delete()
             print("[INFO] Ready to start !")
@@ -96,7 +95,7 @@ class Controller :
         pass
 
     ## Treatements
-    
+
 
     ## Getters
     def get_x(self) -> float :

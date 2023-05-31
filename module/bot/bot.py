@@ -50,7 +50,7 @@ class Bot :
         ## Send heartbeat until response of lobby
         while not self.lobby_connected :
             print("[INFO] Reaching lobby")
-            lobby.put(id_card_json.encode(), Encoding.APP_JSON)
+            lobby.put(id_card_json.encode())
             time.sleep(1)
         lobby.delete()
 
@@ -58,7 +58,7 @@ class Bot :
         controller_waiting_room = self.session.declare_publisher("controller/" + self.controller)
         handshake_controller = self.session.declare_subscriber("controller/" + self.uid + "/handshake", self.handshake_lobby_handler)
         while not self.controller_connected :
-            controller_waiting_room.put(self.uid, Encoding.TEXT_PLAIN)
+            controller_waiting_room.put(self.uid)
             time.sleep(1)
         controller_waiting_room.delete()
         
@@ -75,22 +75,20 @@ class Bot :
         cmd = zenoh
 
     def handshake_lobby_handler(self, sample : Sample) :
-        if sample.encoding == Encoding.TEXT_PLAIN :
-            self.controller = sample.payload.decode()
-            self.lobby_connected = True
-            print("[INFO] Connected ! Assigned to controller {}".format(self.controller))
+        self.controller = sample.payload.decode()
+        self.lobby_connected = True
+        print("[INFO] Connected ! Assigned to controller {}".format(self.controller))
 
     def handshake_controller_handler(self, sample : Sample) :
-        if sample.encoding == Encoding.APP_JSON :
-            try :
-                response = json.load(sample.payload)
-                self.angular_vel = response["angular_vel"]
-                self.linear_vel = response["linear_vel"]
-                self.controller_connected = True
-                print("[INFO] Successfully connected to controller {}".format(self.controller))
-            except :
-                print("[ERROR] {}".format(response))
-                sys.exit(1)
+        try :
+            response = json.load(sample.payload)
+            self.angular_vel = response["angular_vel"]
+            self.linear_vel = response["linear_vel"]
+            self.controller_connected = True
+            print("[INFO] Successfully connected to controller {}".format(self.controller))
+        except :
+            print("[ERROR] {}".format(response))
+            sys.exit(1)
 
     ## Getters
     def get_pos(self) -> geometry.Point2D :
