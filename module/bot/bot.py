@@ -84,7 +84,7 @@ class Bot :
 
     def handshake_controller_handler(self, sample : Sample) :
         try :
-            response = json.load(sample.payload)
+            response = json.loads(sample.payload)
             self.angular_vel = response["angular_vel"]
             self.linear_vel = response["linear_vel"]
             self.controller_connected = True
