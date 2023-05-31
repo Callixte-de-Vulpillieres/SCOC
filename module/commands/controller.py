@@ -105,7 +105,7 @@ class Controller :
             data = json.dumps(CONFIG, indent=4)
             handshake_bot.put(data.encode())
             print("[INFO] Config sent to {}".format(self.bot))
-            handshake_bot.delete()
+            handshake_bot.undeclare()
             print("[INFO] Ready to start !")
             self.bound = True
 
