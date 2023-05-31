@@ -105,6 +105,7 @@ class Controller :
             print("[INFO] Config sent to {}".format(self.bot))
             handshake_bot.delete()
             print("[INFO] Ready to start !")
+            self.bound = True
 
     ## Commands
     def move_to(self, x : float, y : float) :

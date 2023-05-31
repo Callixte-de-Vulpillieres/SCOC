@@ -10,7 +10,7 @@ import os
 
 ROUTER_ADDRESS = ['tcp/192.168.13.1:7447']
 ZTURTLE_PATH = "/home/pi/zenoh-demos/turtlebot3/zdrive-python/zdrive.py"
-ZLIDAR_PATH = ""
+ZLIDAR_PATH = "/home/pi/zenoh-demos/turtlebot3/zlidar-rust/target/release/zlidar"
 
 class Bot :
     cmd_key : str
@@ -67,12 +67,12 @@ class Bot :
         
         ## Run zturtle, cam is at bot/id/cams/0
         print("[INFO] Starting Zturtle")
-        os.system("python3 {} -k {} -e {} -a {} -l {}".format(ZTURTLE_PATH, self.cmd_subscriber_key, ROUTER_ADDRESS, self.angular_vel, self.linear_vel))
+        os.system("python3 {} -p {} -e {} -a {} -l {}".format(ZTURTLE_PATH, self.cmd_subscriber_key, ROUTER_ADDRESS, self.angular_vel, self.linear_vel))
 
         ## Run zlidar
         print("[INFO] Starting zlidar")
         lidar_publisher_key = "bot/{}/lidar".format(self.uid)
-        os.system("sh {} -e {} -k {}".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
+        os.system("sh \"{} -e {} -k {}\"".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
 
         # Init subscribers
         cmd = zenoh
