@@ -9,8 +9,8 @@ import numpy as np
 import time
 import sys
 
-sys.apth.insert(0,'..')
-from module.commands.controller import Controller
+sys.path.insert(0,'..')
+from commands.controller import Controller
 
 @cdr
 class Time:
