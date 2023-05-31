@@ -62,9 +62,10 @@ class Bot :
             print("[INFO] Reaching controller")
             controller_waiting_room.put(self.uid)
             time.sleep(1)
-
-        controller_waiting_room.delete()
+        
         handshake_controller.undeclare()
+        controller_waiting_room.delete()
+        
         
         ## Run zturtle, cam is at bot/id/cams/0
         print("[INFO] Starting Zturtle")
@@ -84,11 +85,16 @@ class Bot :
         print("[INFO] Connected ! Assigned to controller {}".format(self.controller))
 
     def handshake_controller_handler(self, sample : Sample) :
-        response = json.loads(sample.payload.decode())
-        self.angular_vel = response["angular_vel"]
-        self.linear_vel = response["linear_vel"]
-        self.controller_connected = True
-        print("[INFO] Successfully connected to controller {}".format(self.controller))
+        print("a")
+        try :
+            response = json.loads(sample.payload.decode())
+            self.angular_vel = response["angular_vel"]
+            self.linear_vel = response["linear_vel"]
+            self.controller_connected = True
+            print("[INFO] Successfully connected to controller {}".format(self.controller))
+        except :
+            print("[ERROR] {}".format(sample.payload.decode()))
+            sys.exit(1)
 
     ## Getters
     def get_pos(self) -> geometry.Point2D :
