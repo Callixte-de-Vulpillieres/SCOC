@@ -108,10 +108,21 @@ print("Beginning of hiding phase for " + str(args.duration) + " seconds")
 pub.put(args.duration)
 pub.put("Hiding phase")
 time.sleep(args.duration)
+
+losers = []
+def listener_game(sample: Sample) :
+    global losers
+    losers.add(sample.payload)
+    print("Robot " + sample.payload + " has been found")
+sub = session.declare_subscriber(key, listener_game, reliability=Reliability.RELIABLE())
 print("Seeking phase")
 pub.put("Seeking phase")
 
 
+while len(losers) != len(bots) :
+    time.sleep(1)
+print("Bot " + losers[-1] + "has won !")
 
-
+pub.undeclare()
+sub.undeclare()
 session.close()
