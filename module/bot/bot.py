@@ -84,7 +84,7 @@ class Bot :
         print("[INFO] Connected ! Assigned to controller {}".format(self.controller))
 
     def handshake_controller_handler(self, sample : Sample) :
-        print(json.loads(sample.payload.decode()))
+        print(sample.payload.decode())
         try :
             response = json.loads(sample.payload.decode())
             self.angular_vel = response["angular_vel"]

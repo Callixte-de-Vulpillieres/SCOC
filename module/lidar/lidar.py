@@ -56,7 +56,7 @@ class Lidar :
     def __init__(self, dim : tuple, threshold : float = 10) -> None:
         self.angles = np.linspace(-math.pi/2, 3*math.pi/2 - 2*math.pi/360, 360)
         self.threshold = threshold
-        self.draft_map = DraftMap()
+        self.draft_map = DraftMap(dim[0], dim[1])
 
     def handle(self, sample) :
         # print("Scanning")

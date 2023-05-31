@@ -100,8 +100,8 @@ class Controller :
         if sample.payload.decode() == self.bot :
             print("[INFO] Connection requested from {}".format(self.bot))
             handshake_bot = self.session.declare_publisher("controller/{}/peer/handshake".format(self.uid))
-            payload = json.dumps(CONFIG, indent=4)
-            handshake_bot.put(payload.encode())
+            data = json.dumps(CONFIG, indent=4)
+            handshake_bot.put(data.encode())
             print("[INFO] Config sent to {}".format(self.bot))
             handshake_bot.delete()
             print("[INFO] Ready to start !")
