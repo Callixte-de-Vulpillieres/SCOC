@@ -49,7 +49,8 @@ class Bot :
 
         ## Send heartbeat until response of lobby
         while not self.lobby_connected :
-            lobby.put(id_card_json, Encoding.APP_JSON)
+            print("[INFO] Reaching lobby")
+            lobby.put(id_card_json.encode(), Encoding.APP_JSON)
             time.sleep(1)
         lobby.delete()
 
