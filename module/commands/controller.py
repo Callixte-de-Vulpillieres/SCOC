@@ -128,4 +128,5 @@ class Controller :
         return self.slave_angle
 
 if __name__ == "__main__" :
-    c = Controller("2", "cat")
+    c = Controller("mouse", "mouse")
+    
