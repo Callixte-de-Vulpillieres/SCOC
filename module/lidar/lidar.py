@@ -9,8 +9,8 @@ import numpy as np
 import time
 import sys
 
-sys.path.insert(0,'..')
-from commands.controller import Controller
+# sys.path.insert(0,'..')
+# from commands.controller import Controller
 
 @cdr
 class Time:
@@ -52,7 +52,6 @@ class DraftMap :
 
 class Lidar :
     angles = []
-    parent : Controller
 
     def __init__(self, dim : tuple, threshold : float = 10) -> None:
         self.angles = np.linspace(-math.pi/2, 3*math.pi/2 - 2*math.pi/360, 360)

@@ -29,7 +29,9 @@ class Controller :
     uid : str
     bot : str
 
-    lidar : Lidar
+    lidar : lidar.lidar.Lidar
+
+    info : dict
 
     def __init__(self, uid : str) -> None:
         self.uid = uid
@@ -49,42 +51,55 @@ class Controller :
         handshake_lobby = self.session.declare_subscriber("controller/" + self.uid + "/handshake", self.handshake_lobby_handler)
 
         ## Generate id card
-        id_card = {"id" : self.uid, "type" : "controller"}
+        id_card = {"id" : self.uid, "type" : "cat"}
         id_card_json = json.dumps(id_card, indent=4)
 
         ## Send heartbeat until response of lobby
         while not self.lobby_connected :
+            print("[INFO] Reaching lobby")
             lobby.put(id_card_json.encode())
             time.sleep(1)
         lobby.delete()
+        handshake_lobby.undeclare()
 
         ## Wait for bot connection
         print("[INFO] Waiting for bot connection")
         bot_waiting_room = self.session.declare_subscriber("controller/{}".format(self.uid), self.bot_connection_handler)
+        while not self.bound :
+            pass
+        bot_waiting_room.undeclare()
 
+        self.listen()
     
     def listen(self) :
         print("[INFO] Starting subscribers")
+        self.ins_count = 0
         lobby_instruction_subscriber = self.session.declare_subscriber("controller", self.handle_instruction)
-        self.lidar = Lidar(DIM)
+        self.lidar = lidar.Lidar(DIM)
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
     
     ## Handlers
     def handle_instruction(self, sample : Sample) :
-        pass
+        message = sample.payload.decode()
+        if self.ins_count == 0 :
+            self.info["duration"] = message
+            print(self.info["duration"])
+            self.ins_count += 1
+        elif message == "Hidding phase" :
+            print("Starting")
 
 
     ## Protocol methods
     def handshake_lobby_handler(self, sample : Sample) :
-        self.bot = sample.payload.decode()
+        self.bot = json.loads(sample.payload.decode())["id"]
         self.lobby_connected = True
-        print("[INFO] Connected ! Assigned to bot {}".format(self.controller))
+        print("[INFO] Connected ! Assigned to bot {}".format(self.bot))
 
     def bot_connection_handler(self, sample: Sample) :
         if sample.payload.decode() == self.bot :
             print("[INFO] Connection requested from {}".format(self.bot))
-            handshake_bot = self.session.declare_publisher("controller/{}/handshake".format(self.uid))
+            handshake_bot = self.session.declare_publisher("controller/{}/peer/handshake".format(self.uid))
             payload = json.dumps(CONFIG, indent=4)
             handshake_bot.put(payload.encode())
             print("[INFO] Config sent to {}".format(self.bot))
@@ -107,3 +122,6 @@ class Controller :
     
     def get_angle(self) -> float :
         return self.slave_angle
+
+if __name__ == "__main__" :
+    c = Controller("2")
