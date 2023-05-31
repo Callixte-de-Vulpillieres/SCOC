@@ -6,7 +6,8 @@ from zenoh import Sample
 import time
 import sys
 sys.path.insert(0, '..')
-from module.lidar.lidar import Lidar
+import lidar
+from lidar.lidar import Lidar
 
 
 ROUTER_ADDRESS = ['tcp/192.168.13.1:7447']
