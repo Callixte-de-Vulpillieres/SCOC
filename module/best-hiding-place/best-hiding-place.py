@@ -47,14 +47,14 @@ def visible_2_points(case_depart,case_arrivee,dens,seuil=1):
             if dens[ligne, cl] >= seuil:
                 return False
     return True
-affichaget(visible_2_points([0,1],[5,7], [[0 for i in range(10)] for j in range(10)]))
-def density(map, grille,range_scan):
+# affichaget(visible_2_points([0,1],[5,7], [[0 for i in range(10)] for j in range(10)]))
+def density(map, grille,range_scan,seuil=1):
     step= range_scan/grille
     res=np.array([[0]*grille for i in range(grille)])
     for point in map:
         print(point[0]//step)
         res[int(point[0]//step),int(point[1]//step)]+=1
-    return res
+    return (2*res//seuil).astype(bool)
 
 def visible(map, point,grille, range_scan,seuil,nombre_points):
     """map: carte des points (coordonnées)
