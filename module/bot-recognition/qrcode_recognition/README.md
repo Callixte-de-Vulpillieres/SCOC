@@ -1,4 +1,4 @@
-# Eclipse zenoh QRCode Recognition Demo
+# QRCode Recognition Demo
 This is a relatively simple demo that shows how to generate a qrcode and scann it using pyzbar python library.
 
 ## Pre-requisite
