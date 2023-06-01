@@ -79,7 +79,7 @@ def pub_twist(linear, angular):
     session.put("", t.serialize())
 
 goal = (x,y)
-
+cleaned_map=clean_map(map.discrete())
 path = astar(map.discrete(),bot.position,goal)
 moves = [path[i+1]-path[i] for i in range(len(path)-1)]
 
