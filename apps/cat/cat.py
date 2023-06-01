@@ -4,6 +4,7 @@ import cv2
 import sys
 import os 
 from math import pi
+from zenoh import Zenoh, ZenohSession
 
 # setting path
 qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
@@ -15,17 +16,24 @@ from qrcode_scanner import *
 
 searching = True
 bots_found = []
-nb_bots = 5
+nb_bots = 2
 
 cam = cv2.VideoCapture(0)
 cam.set(3, 640)
 cam.set(4, 480)
-fps = 10
+fps = 20
 
 start_time = time.time()
 looking_time = 0.5
 nb  = 0
 angle = pi/4
+
+
+
+
+zenoh = Zenoh()
+session = zenoh.open()
+publisher = session.declare_publisher("/lobby")
 
 def move():
     print("moving")
@@ -41,7 +49,7 @@ while searching:
             if bot not in bots_found:
                 bots_found.append(bot)
                 #send to lobby:
-                
+                publisher.write(str(bot))
                 if len(bots_found) >= nb_bots:
                     searching = False
                     print("I win!")
@@ -59,3 +67,6 @@ while searching:
     if nb*angle >= 2*pi:
         nb = 0
         move()
+        
+session.close()
+zenoh.shutdown()
