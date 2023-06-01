@@ -30,8 +30,8 @@ angle = pi/4
 def move():
     print("moving")
 
-def turn_around():
-    print("turning")
+def turn_around(angle ):
+    print("turning",angle)
 
 while searching:
     # scan les qrcodes
@@ -53,9 +53,9 @@ while searching:
     if time.time()> start_time + looking_time:
         start_time = time.time()
         turn_around(angle)
-        n += 1
+        nb += 1
     
     #se bouger le cul apres avoir fait le tour
-    if n*angle >= 2*pi:
-        n = 0
+    if nb*angle >= 2*pi:
+        nb = 0
         move()
