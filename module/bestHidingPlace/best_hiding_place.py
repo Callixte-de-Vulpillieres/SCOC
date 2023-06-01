@@ -6,34 +6,12 @@ width = 12
 lenght = 12
 grille=50
 range_scan=50
+step=grille/range_scan
 
 # Fonctions utiles
-def distance (a,b):
-    """Renvoie la distance entre deux points"""
-    return np.sqrt((b[0]-a[0])**2+(b[1]-a[1])**2)
-def find_min(a,L):
-    if len(L)==0:
-        return None
-    elif len(L)==1:
-        return distance(L[0],a)
-    else:
-        mini=distance(L[0],a)
-        indice=0
-        for k in range(1, len(L)):
-            if distance(a,k)<mini:
-                mini=distance(a,k)
-                indice=k
-        return L[indice]
-
-def affichaget(L):
-    res=''
-    for i in range(len(L)):
-        for j in range(len(L[0])):
-            res=res+str(L[i,j])+' ; '
-        res+='\n'
-    print(res)
 
 def visible_2_points(case_depart,case_arrivee,dens,seuil=1):
+    case_depart=np.array(case_depart).astype(int)
     if case_depart[0] != case_arrivee[0]:
         pente = (case_arrivee[1] - case_depart[1]) / (case_arrivee[0] - case_depart[0])
         ordonnee_origine = case_depart[1] - pente * case_depart[0]  
@@ -49,36 +27,35 @@ def visible_2_points(case_depart,case_arrivee,dens,seuil=1):
     return True
 
 def density(map,grille,range_scan,seuil=1):
-    step= range_scan/grille
+    step= range_scan/grille[0]
     res=np.zeros(grille)
     for point in map:
-        print(point[0]//step)
         res[int(point[0]//step),int(point[1]//step)]+=1
     return (2*res//seuil).astype(bool)
 
-def visible(dsty, point,grille, range_scan,seuil,nombre_points):
+def visible(dsty, point,step,seuil,nombre_points):
     """map: carte des points (coordonnées)
     point: coordonnées du point dont on veut savoir la visibilité
-    grille: nombre de points sur un axe de la grille
+    grille: liste du nombre de point par côté de la grille
     range_scan : distance de la grille
     seuil: seuil de densité suffisant pour considérer que c'est un mur
     nombre_points: nombre tiré au hasard d'observateurs"""
     sources=[[randrange(int(range_scan)),randrange(int(range_scan))] for i in range(nombre_points)]
-    step= range_scan/grille
     score=0
     for elt in sources:
-        print("step:", step)
         if not visible_2_points([int(point[0])//step,int(point[1]//step)],elt,dsty,seuil):
             score+=1
     return score/nombre_points
 
-def score_cachette(map, point,grille, range_scan,seuil,nombre_points,taille):
-    # if acccessible : 
-    for pt in map:
-        if (pt[0]-point[0])**2+(pt[1]-point[1])**2<taille:
-            return 0
+def score_cachette(density, point,step,seuil,nombre_points,taille):
+    # if acccessible :
+    a,b=density.shape
+    crop = density[max(0,point[0]-taille):min(a,point[0]+taille),max(0,point[1]-taille):min(b,point[1]+taille)]
+    c,d=crop.shape
+    if crop.all() == np.zeros([c,d]).all():
+        return visible(density,point,step,seuil,nombre_points)
     else:
-        return visible(map, point,grille, range_scan,seuil,nombre_points)
+        return 0
 
 def min_score(t,origine,tau):
     return origine*np.exp(-t/tau)
@@ -91,7 +68,7 @@ def simplify(grid,factor,centre, radius):
             res.append((i,j))
     return res
 
-def decidemove(map, time, origin, tau ,position, nombre_points, densite, grille, scanning_range, score, taille, factor=1, seuil=1):
+def decidemove(time, origin, tau ,position, nombre_points, densite, step, scanning_range, score, taille, factor=1, seuil=1):
     """
     map: liste des positions des points
     time: temps actuel (sera fourni par time.time)
@@ -119,14 +96,17 @@ def decidemove(map, time, origin, tau ,position, nombre_points, densite, grille,
             dejavu=False
             for elt in score:
                 if elt[1:] == point:
-                    elt[0]=score_cachette(map, point, grille, range_scan, seuil, nombre_points,taille)
+                    elt[0]=score_cachette(densite, point, step, seuil, nombre_points,taille)
                     dejavu=True
                     break
             if not dejavu:
-                score.append([score_cachette(map, point, grille, range_scan, seuil, nombre_points,taille)]+point)
+                score.append([score_cachette(densite, point, step , seuil, nombre_points,taille)]+list(point))
         score.sort()
+        return score[-1][1:]
         # Renvoyer chemin vers le score[-1][1:]
 if __name__== '__main__':
     testmap= [[1+0.1*k,1] for k in range (100)]
     #print(decidemove(testmap,0,1,100,np.array([35,10]),10,densite=density(testmap,grille=grille,range_scan=range_scan, seuil=1,),grille=grille,scanning_range=10,score=[],taille=2,factor=1,seuil=1))
-    print(visible(map=density(testmap,[grille,grille],grille), point=[2,2],grille=grille,range_scan=10,seuil=1,nombre_points=10))
+    print(visible(dsty=density(testmap,[grille,grille],grille), point=[2,2],step=step,seuil=1,nombre_points=10))
+    print(score_cachette(density=density(testmap,[grille,grille],grille),point=[2,2],step=step,seuil=1,nombre_points=1000,taille=2))
+    print(decidemove(time=0,origin=1,tau=100, position=[20,20], nombre_points=100, densite=density(testmap,[grille,grille],grille),step=step,scanning_range=20,score=[],taille=2))
