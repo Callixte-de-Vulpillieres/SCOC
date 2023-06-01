@@ -12,7 +12,10 @@ range_scan=50
 step=grille/range_scan
 
 # Fonctions utiles
-def find_path(maze, start, goal):
+
+def find_path(maze, st, go):
+    start=tuple(st)
+    goal=tuple(go)
     # Vérifier si les points de départ et d'arrivée sont valides
     if maze[start[0]][start[1]] == 1 or maze[goal[0]][goal[1]] == 1:
         return None
@@ -117,7 +120,9 @@ def visible(dsty, point,step,seuil,nombre_points):
             score+=1
     return score/nombre_points
 
-def score_cachette(density, point,step,seuil,nombre_points,taille):
+def score_cachette(density, point,step,seuil,nombre_points,taille,position):
+    if find_path(density,position, point)==None:
+        return 0
     a,b=density.shape
     crop = density[max(0,point[0]-taille):min(a,point[0]+taille),max(0,point[1]-taille):min(b,point[1]+taille)]
     c,d=crop.shape
@@ -137,7 +142,7 @@ def simplify(grid,factor,centre, radius):
             res.append((i,j))
     return res
 
-def decidemove(time, origin, tau ,position, nombre_points, densite, step, scanning_range, score, taille, factor=1, seuil=1):
+def decidemove(time, origin, tau ,position, nombre_points, densite, step, scanning_range, score, taille, factor=1, seuil=1,case_step=2):
     """
     map: liste des positions des points
     time: temps actuel (sera fourni par time.time)
@@ -165,23 +170,21 @@ def decidemove(time, origin, tau ,position, nombre_points, densite, step, scanni
             dejavu=False
             for elt in score:
                 if elt[1:] == point:
-                    elt[0]=score_cachette(densite, point, step, seuil, nombre_points,taille)
+                    elt[0]=score_cachette(densite, point, step, seuil, nombre_points,taille,position)
                     dejavu=True
                     break
             if not dejavu:
-                score.append([score_cachette(densite, point, step , seuil, nombre_points,taille)]+list(point))
+                score.append([score_cachette(densite, point, step , seuil, nombre_points,taille,position)]+list(point))
         score.sort()
-        return score[-1][1:]
-        # Renvoyer chemin vers le score[-1][1:]
+        return find_path(densite,position,score[-1][1:])[:case_step]
 if __name__== '__main__':
     testmap= [[1+0.1*k,1] for k in range (100)]
     #print(decidemove(testmap,0,1,100,np.array([35,10]),10,densite=density(testmap,grille=grille,range_scan=range_scan, seuil=1,),grille=grille,scanning_range=10,score=[],taille=2,factor=1,seuil=1))
     print(visible(dsty=density(testmap,[grille,grille],grille), point=[2,2],step=step,seuil=1,nombre_points=10))
-    print(score_cachette(density=density(testmap,[grille,grille],grille),point=[2,2],step=step,seuil=1,nombre_points=1000,taille=2))
     print(decidemove(time=0,origin=1,tau=100, position=[20,20], nombre_points=100, densite=density(testmap,[grille,grille],grille),step=step,scanning_range=20,score=[],taille=2))
     maze = [
     [0, 1, 0, 0, 0],
-    [1, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0],
     [0, 1, 0, 1, 0],
     [0, 1, 0, 0, 0],
     [0, 0, 0, 1, 0]
@@ -195,7 +198,6 @@ if __name__== '__main__':
 
     if path is not None:
         print("Chemin trouvé:")
-        for position in path:
-            print(position)
+        print(path)
     else:
         print("Aucun chemin trouvé.")
