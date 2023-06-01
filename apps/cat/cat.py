@@ -3,6 +3,7 @@ import time
 import cv2
 import sys
 import os 
+from math import pi
 
 # setting path
 qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
@@ -22,10 +23,15 @@ cam.set(4, 480)
 fps = 10
 
 start_time = time.time()
-searching_time = 5
+looking_time = 0.5
+nb  = 0
+angle = pi/4
 
 def move():
     print("moving")
+
+def turn_around():
+    print("turning")
 
 while searching:
     # scan les qrcodes
@@ -43,9 +49,13 @@ while searching:
     time.sleep(1/fps)
     print(bots_found)
     
-    #se bouger le cul
-    if time.time()> start_time + searching_time:
+    #tourner chaque "looking_time" secondes
+    if time.time()> start_time + looking_time:
         start_time = time.time()
+        turn_around(angle)
+        n += 1
+    
+    #se bouger le cul apres avoir fait le tour
+    if n*angle >= 2*pi:
+        n = 0
         move()
-        
-
