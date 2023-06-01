@@ -1,39 +1,75 @@
+
+import time
+import cv2
 from qrcode_scanner import *
 from commands import *
+
 import sys
+import os 
+from math import pi
+from zenoh import Zenoh, ZenohSession
 
 # setting path
-sys.path.append('.../module/bot-recognition/qrcode_recognition')
-sys.path.append('.../module/commands')
+qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
+commands_path = os.path.abspath('../../module/commands')
+sys.path.append(qrcode_recognition_path)
+sys.path.append(commands_path)
 
+from qrcode_scanner import *
 
 searching = True
-nb_bots_found = 0
-nb_bots = 1
+bots_found = []
+nb_bots = 2
 
-map = commands.getmap()  # ??
+cam = cv2.VideoCapture(0)
+cam.set(3, 640)
+cam.set(4, 480)
+fps = 20
 
+start_time = time.time()
+looking_time = 0.5
+nb  = 0
+angle = pi/4
+
+
+
+zenoh = Zenoh()
+session = zenoh.open()
+publisher = session.declare_publisher("/lobby")
+
+def move():
+    print("moving")
+
+def turn_around(angle ):
+    print("turning",angle)
 
 while searching:
-    # cherche un point au hazrd dans les zones dispos
-    # se dirige vers cette zone
+    # scan les qrcodes
+    success, res = recognition(cam)
+    if success:
+        for bot in res:
+            if bot not in bots_found:
+                bots_found.append(bot)
+                #send to lobby:
+                publisher.write(str(bot))
+                if len(bots_found) >= nb_bots:
+                    searching = False
+                    print("I win!")
+                    cam.release()
+    time.sleep(1/fps)
+    print(bots_found)
+    
+    #tourner chaque "looking_time" secondes
+    if time.time()> start_time + looking_time:
+        start_time = time.time()
+        turn_around(angle)
+        nb += 1
+    
+    #se bouger le cul apres avoir fait le tour
+    if nb*angle >= 2*pi:
+        nb = 0
+        move()
+        
+session.close()
+zenoh.shutdown()
 
-    # cherche un bot
-    res, bot = scan_environment()
-    if res == True:
-        bot_found(bot)
-
-# play victory sound
-
-def scan_environment():
-    # se tourne pour voir s'il y a des robots dans la zone
-
-
-def scan_ligne():
-    # se deplace jusqu'a l'obstacle le plus proche a gauche / a droite
-
-
-def envoie_id_robot_trouvé():
-
-    # reconnait le robot
-    # envoie l id au lobby?
