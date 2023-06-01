@@ -52,14 +52,15 @@ class Lidar :
         self.closerizon = closerizon
 
     def handle(self, sample) :
-        # print("Scanning")
-        # print('[DEBUG] Received frame: {}'.format(sample.key_expr))
-        scan = LaserScan.deserialize(sample.payload)
-        for (angle, distance, intensity) in zip(self.angles, scan.ranges, scan.intensities) :
-            if intensity > self.threshold and distance < self.horizon and distance > self.closerizon:
-                self.draft_map.draw(math.cos(angle + self.parent.get_angle())*distance, math.sin(angle + self.parent.get_angle()) * distance, self.parent.get_x(), self.parent.get_y())
-                
-        #self.draft_map.show()
+        if self.parent.to_scan :
+            # print("Scanning")
+            # print('[DEBUG] Received frame: {}'.format(sample.key_expr))
+            scan = LaserScan.deserialize(sample.payload)
+            for (angle, distance, intensity) in zip(self.angles, scan.ranges, scan.intensities) :
+                if intensity > self.threshold and distance < self.horizon and distance > self.closerizon:
+                    self.draft_map.draw(math.cos(angle + self.parent.get_angle())*distance, math.sin(angle + self.parent.get_angle()) * distance, self.parent.get_x(), self.parent.get_y())
+                    
+            #self.draft_map.show()
 
 
 

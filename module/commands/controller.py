@@ -8,7 +8,12 @@ import sys
 sys.path.insert(0, '..')
 import lidar
 from lidar.lidar import Lidar
-
+import math
+from pycdr import cdr
+from pycdr.types import int8, int32, uint32, float64
+from astar import *
+from hiding.hiding import decidemove
+import numpy
 
 ROUTER_ADDRESS = ['tcp/192.168.13.1:7447']
 CONFIG = {
@@ -32,8 +37,17 @@ class Controller :
     uid : str
     bot : str
 
+    cmd_pub : zenoh.Publisher
+
     lidar : lidar.lidar.Lidar
     info : dict = {}
+
+    elapsed : float
+    duration : float
+    start : float
+
+    score : list
+    to_scan : bool = False
 
     def __init__(self, uid : str, role : str) -> None:
         self.uid = uid
@@ -89,12 +103,13 @@ class Controller :
         message = sample.payload.decode()
         if self.ins_count == 0 :
             self.info["duration"] = message
-            print(self.info["duration"])
+            self.duration = float(message)
+            self.start = time.time()
             self.ins_count += 1
         if message == "Hiding phase" :
             print("[INFO] Starting")
-        
-
+            if self.type == "mouse" :
+                self.mouse()
 
     ## Protocol methods
     def handshake_lobby_handler(self, sample : Sample) :
@@ -117,11 +132,42 @@ class Controller :
             print("[INFO] Ready to start !")
             self.bound = True
 
-    ## Commands
-    def move_to(self, x : float, y : float) :
-        pass
+    ## Move commands
+    def move(self,direction,length):
+        currentAngle = self.get_angle()
+        pub_twist((direction - currentAngle) * self.angular_vel, 0.0, self.cmd_pub)
+        pub_twist(0.0, length * self.linear_vel, self.cmd_pub)
+        self.position.x=self.position.x + length * math.cos(direction)
+        self.position.y=self.position.y + length * math.sin(direction)
+    
+    def move_path(self,path):
+        for i,el in enumerate(path[:-1]):
+            match path[i+1][0] - path[i][0] :
+                case 1 :
+                    match path[i+1][1] - path[i][1] :
+                        case 1 :
+                            self.move(0, 1)
+                        case 0 :
+                            self.move(0,-1)
+                case -1 :
+                    match path[i+1][1] - path[i][1] :
+                        case 1 :
+                            self.move(90,1)
+                        case 0 :
+                            self.move(-90,1)
 
     ## Treatements
+    def mouse(self) :
+        self.elapsed = time.time() - self.start
+        self.score = []
+        print("[INFO] Moving")
+        while self.elapsed < self.duration :
+            self.to_scan = False
+            next_moves = decidemove(self.elapsed, 0.9, 120, (self.get_x(), self.get_y()),20,self.lidar.draft_map, 1, 150, self.score, 10,5,1,10)
+            print("[INFO] Next moves", next_moves)
+            self.move_path(next_moves)
+            self.to_scan = True
+            time.sleep(1)
 
 
     ## Getters
@@ -133,6 +179,51 @@ class Controller :
     
     def get_angle(self) -> float :
         return self.slave_angle
+
+
+class Vector3:
+    x: float64
+    y: float64
+    z: float64
+
+class Twist:
+    linear: Vector3
+    angular: Vector3
+
+class Time:
+    sec: int32
+    nanosec: uint32
+
+class Log:
+    stamp: Time
+    level: int8
+    name: str
+    msg: str
+    file: str
+    function: str
+    line: uint32
+
+def clean_map(map,size):
+    position_next=[[(i,j) for i in range(-size,size)] for j in range(-size,size)]
+    position_next=position_next.flatten()
+    n,m=map.shape()
+    map2=numpy.array(n,m)
+    for i in range(n):
+        for j in range(m):
+            value=0
+            for el in position_next:
+                k,l=(i,j)+el
+                if 0<=k<=n and 0<=l<=m and map2[i,j]!=1 and map[k,l]:
+                    map2[i,j]=1
+
+
+
+def pub_twist(linear, angular, publisher):
+    print("Pub twist: {} - {}".format(linear, angular))
+    t = Twist(linear=Vector3(x=linear, y=0.0, z=0.0),
+                angular=Vector3(x=0.0, y=0.0, z=angular))
+    publisher.put("", t.serialize())  
+
 
 if __name__ == "__main__" :
     c = Controller("mouse", "mouse")
