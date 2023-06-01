@@ -41,19 +41,24 @@ class LaserScan:
 
 class Lidar :
     angles = []
-
-    def __init__(self, dim : tuple, threshold : float = 10) -> None:
+    step : float
+    def __init__(self, dim : tuple, parent, step, threshold : float = 10, horizon : float = 0.5, closerizon : float = 0.05) -> None:
         self.angles = np.linspace(-math.pi/2, 3*math.pi/2 - 2*math.pi/360, 360)
         self.threshold = threshold
-        self.draft_map = DraftMap(dim[0], dim[1])
+        self.draft_map = DraftMap(dim[0], dim[1],step)
+        self.parent = parent
+        self.step = step
+        self.horizon = horizon
+        self.closerizon = closerizon
 
     def handle(self, sample) :
         # print("Scanning")
         # print('[DEBUG] Received frame: {}'.format(sample.key_expr))
         scan = LaserScan.deserialize(sample.payload)
         for (angle, distance, intensity) in zip(self.angles, scan.ranges, scan.intensities) :
-            if intensity > self.threshold :
-                self.draft_map.draw(math.cos(angle + self.parent.get_angle())*distance + self.parent.get_x() , math.sin(angle + self.parent.get_angle()) * distance + self.parent.get_y())
+            if intensity > self.threshold and distance < self.horizon and distance > self.closerizon:
+                self.draft_map.draw(math.cos(angle + self.parent.get_angle())*distance, math.sin(angle + self.parent.get_angle()) * distance, self.parent.get_x(), self.parent.get_y())
+                
         #self.draft_map.show()
 
 

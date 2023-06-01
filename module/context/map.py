@@ -5,17 +5,21 @@ import numpy as np
 class DraftMap :
     points = []
     step : float
-    def __init__(self, x_size, y_size) -> None:
+    def __init__(self, x_size, y_size, step) -> None:
         self.x_size = x_size
         self.y_size = y_size
-        self.points = np.ndarray((self.x_size, self.y_size))
+        self.points = np.zeros((self.x_size, self.y_size))
+        self.step = step
     
-    def draw(self, x, y) -> None:
-        discrete_x = int(x*self.step)
-        discrete_y = int(y*self.step)
-        self.points[discrete_x,discrete_y] = 1
+    def draw(self, x, y, posx, posy) -> None:
+        discrete_x = int(x/self.step)
+        discrete_y = int(y/self.step)
+        try :
+            self.points[discrete_x+posx,discrete_y+posy] = 1
+        except :
+            pass
     
     def show(self) :
-        plt.plot(self.points)
+        plt.matshow(self.points)
         plt.show()
     
