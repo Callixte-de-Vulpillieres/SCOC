@@ -1,4 +1,5 @@
 import sys
+import numpy
 from time import sleep
 from math import cos,sin
 from datetime import datetime
@@ -55,6 +56,20 @@ class bot:
         for el in path:
             self.move(el[0],el[1])
             sleep(1000)
+
+def clean_map(map,size):
+    position_next=[[(i,j) for i in range(-size,size)] for j in range(-size,size)]
+    position_next=position_next.flatten()
+    n,m=map.shape()
+    map2=numpy.array(n,m)
+    for i in range(n):
+        for j in range(m):
+            value=0
+            for el in position_next:
+                k,l=(i,j)+el
+                if 0<=k<=n and 0<=l<=m and map2[i,j]!=1 and map[k,l]:
+                    map2[i,j]=1
+
 
 
 def pub_twist(linear, angular):
