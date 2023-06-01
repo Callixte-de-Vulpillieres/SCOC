@@ -1,6 +1,9 @@
 
 import time
 import cv2
+from qrcode_scanner import *
+from commands import *
+
 import sys
 import os 
 from math import pi
@@ -27,7 +30,6 @@ start_time = time.time()
 looking_time = 0.5
 nb  = 0
 angle = pi/4
-
 
 
 
@@ -70,3 +72,4 @@ while searching:
         
 session.close()
 zenoh.shutdown()
+
