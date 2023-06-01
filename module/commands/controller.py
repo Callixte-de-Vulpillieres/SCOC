@@ -34,6 +34,7 @@ class Controller :
 
     lidar : lidar.lidar.Lidar
     info : dict = {}
+    others : dict = {}
 
     def __init__(self, uid : str, role : str) -> None:
         self.uid = uid
@@ -48,6 +49,8 @@ class Controller :
 
         ## Init session
         self.session = zenoh.open(conf)
+
+        self.collision = self.session.declare_publisher("collision")
 
         ## Join lobby
         lobby = self.session.declare_publisher("lobby")
@@ -81,6 +84,7 @@ class Controller :
         self.lidar = Lidar((self.x_max, self.y_max))
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
+        others_subscriber = self.session.declare_subscriber("collision", self.bot_collision_reiciver)
         while True :
             time.sleep(1)
 
@@ -117,6 +121,16 @@ class Controller :
             print("[INFO] Ready to start !")
             self.bound = True
 
+    def bot_collision_reiciver(self, sample: Sample) :
+        data = json.loads(sample.payload.decode())
+        if data["id"] != self.uid :
+            self.others[data["id"]] = {"x" : data["x"], "y" : data["y"]}
+
+    def bot_collision_sender(self) :
+        jsn = json.dumps({"id" : self.uid, "x" : self.x, "y" : self.y})
+        self.collision.put(jsn.encode())
+        
+        
     ## Commands
     def move_to(self, x : float, y : float) :
         pass
