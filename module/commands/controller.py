@@ -78,7 +78,7 @@ class Controller :
         print("[INFO] Starting subscribers")
         self.ins_count = 0
         lobby_instruction_subscriber = self.session.declare_subscriber("controller", self.handle_instruction)
-        self.lidar = Lidar((self.x_max, self.y_max))
+        self.lidar = Lidar((self.x_max, self.y_max), self)
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
         while True :
