@@ -9,8 +9,8 @@ import numpy as np
 import time
 import sys
 
-# sys.path.insert(0,'..')
-# from commands.controller import Controller
+sys.path.insert(0,'..')
+from context.map import DraftMap
 
 @cdr
 class Time:
@@ -37,18 +37,7 @@ class LaserScan:
     ranges: array[float32, 360]
     intensities: array[float32, 360]
 
-class DraftMap :
-    points = [] 
-    def __init__(self, x_size, y_size) -> None:
-        self.x_size = x_size
-        self.y_size = y_size
-    
-    def draw(self, x, y) -> None:
-        self.points.append(geometry.Point2D(x,y))
-    
-    def show(self) :
-        plt.scatter([point.x for point in self.points], [point.y for point in self.points])
-        plt.show()
+
 
 class Lidar :
     angles = []
