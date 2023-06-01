@@ -1,14 +1,84 @@
 # Imports
 import numpy as np
 from random import randrange
+import heapq
+#from  ..commands import astar
 # Specs
 width = 12
+
 lenght = 12
 grille=50
 range_scan=50
 step=grille/range_scan
 
 # Fonctions utiles
+def find_path(maze, start, goal):
+    # Vérifier si les points de départ et d'arrivée sont valides
+    if maze[start[0]][start[1]] == 1 or maze[goal[0]][goal[1]] == 1:
+        return None
+
+    # Dimensions du labyrinthe
+    rows = len(maze)
+    cols = len(maze[0])
+
+    # Fonction d'estimation du coût heuristique (distance de Manhattan)
+    def heuristic(point):
+        return abs(point[0] - goal[0]) + abs(point[1] - goal[1])
+
+    # Fonction de coût du chemin jusqu'à un point donné
+    def cost(point):
+        return maze[point[0]][point[1]]
+
+    # Liste des voisins d'un point donné
+    def neighbors(point):
+        row, col = point
+        candidates = [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]
+        return [(r, c) for r, c in candidates if 0 <= r < rows and 0 <= c < cols and maze[r][c] == 0]
+
+    # Initialisation des structures de données
+    open_set = []
+    closed_set = set()
+    came_from = {}
+
+    # Coût du départ à zéro
+    g_score = {start: 0}
+
+    # Estimation du coût total à partir du départ
+    f_score = {start: heuristic(start)}
+
+    # Ajout du point de départ à l'ensemble ouvert
+    heapq.heappush(open_set, (f_score[start], start))
+
+    while open_set:
+        _, current = heapq.heappop(open_set)
+
+        if current == goal:
+            # Chemin trouvé, reconstruction du chemin
+            path = []
+            while current in came_from:
+                path.append(current)
+                current = came_from[current]
+            path.append(start)
+            path.reverse()
+            return path
+
+        closed_set.add(current)
+
+        for neighbor in neighbors(current):
+            if neighbor in closed_set:
+                continue
+
+            tentative_g_score = g_score[current] + cost(neighbor)
+
+            if neighbor not in open_set or tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + heuristic(neighbor)
+                if neighbor not in open_set:
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+
+    # Aucun chemin trouvé
+    return None
 
 def visible_2_points(case_depart,case_arrivee,dens,seuil=1):
     case_depart=np.array(case_depart).astype(int)
@@ -48,7 +118,6 @@ def visible(dsty, point,step,seuil,nombre_points):
     return score/nombre_points
 
 def score_cachette(density, point,step,seuil,nombre_points,taille):
-    # if acccessible :
     a,b=density.shape
     crop = density[max(0,point[0]-taille):min(a,point[0]+taille),max(0,point[1]-taille):min(b,point[1]+taille)]
     c,d=crop.shape
@@ -110,3 +179,23 @@ if __name__== '__main__':
     print(visible(dsty=density(testmap,[grille,grille],grille), point=[2,2],step=step,seuil=1,nombre_points=10))
     print(score_cachette(density=density(testmap,[grille,grille],grille),point=[2,2],step=step,seuil=1,nombre_points=1000,taille=2))
     print(decidemove(time=0,origin=1,tau=100, position=[20,20], nombre_points=100, densite=density(testmap,[grille,grille],grille),step=step,scanning_range=20,score=[],taille=2))
+    maze = [
+    [0, 1, 0, 0, 0],
+    [1, 1, 0, 1, 0],
+    [0, 1, 0, 1, 0],
+    [0, 1, 0, 0, 0],
+    [0, 0, 0, 1, 0]
+    ]
+
+
+    start = (0, 0)  # Point de départ
+    goal = (4, 4)   # Point d'arrivée
+
+    path = find_path(maze, start, goal)
+
+    if path is not None:
+        print("Chemin trouvé:")
+        for position in path:
+            print(position)
+    else:
+        print("Aucun chemin trouvé.")
