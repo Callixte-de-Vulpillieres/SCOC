@@ -1,16 +1,21 @@
 from matplotlib import pyplot as plt
 from sympy import geometry
+import numpy as np
 
 class DraftMap :
-    points = [] 
+    points = []
+    step : float
     def __init__(self, x_size, y_size) -> None:
         self.x_size = x_size
         self.y_size = y_size
+        self.points = np.ndarray((self.x_size, self.y_size))
     
     def draw(self, x, y) -> None:
-        self.points.append(geometry.Point2D(x,y))
+        discrete_x = int(x*self.step)
+        discrete_y = int(y*self.step)
+        self.points[discrete_x,discrete_y] = 1
     
     def show(self) :
-        plt.scatter([point.x for point in self.points], [point.y for point in self.points])
+        plt.plot(self.points)
         plt.show()
     
