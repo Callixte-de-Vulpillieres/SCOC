@@ -23,6 +23,9 @@ class Controller :
     slave_y : float = 0
     slave_angle : float = 0
 
+    x_max : float
+    y_max : float
+
     lobby_connected : bool = False
     bound : bool = False
     session : Session
@@ -75,7 +78,7 @@ class Controller :
         print("[INFO] Starting subscribers")
         self.ins_count = 0
         lobby_instruction_subscriber = self.session.declare_subscriber("controller", self.handle_instruction)
-        self.lidar = Lidar(DIM)
+        self.lidar = Lidar((self.x_max, self.y_max))
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
         while True :
@@ -95,7 +98,11 @@ class Controller :
 
     ## Protocol methods
     def handshake_lobby_handler(self, sample : Sample) :
-        self.bot = json.loads(sample.payload.decode())["id"]
+        data = json.loads(sample.payload.decode())
+        self.bot = data["id"]
+        self.x_max = data["x_max"]
+        self.y_max = data["y_max"]
+        self.slave_angle = data["angle"]
         self.lobby_connected = True
         print("[INFO] Connected ! Assigned to bot {}".format(self.bot))
 
