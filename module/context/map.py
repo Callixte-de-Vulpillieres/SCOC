@@ -10,6 +10,7 @@ class DraftMap :
         self.y_size = y_size
         self.points = np.zeros((self.x_size, self.y_size))
         self.step = step
+        self.shape = (x_size, y_size)
     
     def draw(self, x, y, posx, posy) -> None:
         discrete_x = int(x/self.step)
