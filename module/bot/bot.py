@@ -26,7 +26,7 @@ class Bot :
 
 
     def __init__(self, uid : str) -> None:
-        self.cmd_subscriber_key = "bot/{}/cmd_vel".format(uid)
+        self.cmd_subscriber_key = "bot/{}/".format(uid)
         self.lobby_connected = False
         self.controller_connected = False
         self.controller = ""

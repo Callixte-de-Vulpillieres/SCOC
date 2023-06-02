@@ -6,7 +6,6 @@ from zenoh import Sample
 import time
 import sys
 sys.path.insert(0, '..')
-import lidar
 from lidar.lidar import Lidar
 import math
 from pycdr import cdr
@@ -14,6 +13,15 @@ from pycdr.types import int8, int32, uint32, float64
 from astar import *
 from hiding.hiding import decidemove
 import numpy
+import cv2
+from qrcode_scanner import *
+from commands import *
+
+# setting path for qrcode recognition
+qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
+commands_path = os.path.abspath('../../module/commands')
+sys.path.append(qrcode_recognition_path)
+sys.path.append(commands_path)
 
 ROUTER_ADDRESS = ['tcp/192.168.13.1:7447']
 CONFIG = {
@@ -48,6 +56,12 @@ class Controller :
 
     score : list
     to_scan : bool = False
+
+    searching : bool = False
+    bots_found : list = []
+
+    cat_publisher_key : str = "lobby"
+    cat_publisher : zenoh.Publisher
 
     def __init__(self, uid : str, role : str) -> None:
         self.uid = uid
@@ -110,6 +124,8 @@ class Controller :
             print("[INFO] Starting")
             if self.type == "mouse" :
                 self.mouse()
+            if self.type == "cat" :
+                self.cat()
 
     ## Protocol methods
     def handshake_lobby_handler(self, sample : Sample) :
@@ -169,6 +185,38 @@ class Controller :
             self.to_scan = True
             time.sleep(1)
 
+    def cat(self) :
+        self.cat_publisher = self.session.declare_publisher(self.cat_publisher_key)
+        cam = self.session.declare_subscriber("bot/{}/cam".format(self.cmd_pub),self.camera_handler)
+        print("[INFO] Starting cat mode")
+        while self.searching :
+            # Scan and turn around
+            for i in range(36) :
+                self.move(10, 0)
+
+            self.cat_move()
+        
+        print("[INFO] Exiting")
+
+    def camera_handler(self, sample):
+        npImage = numpy.frombuffer(bytes(sample.value.payload), dtype=numpy.uint8)
+        matImage = cv2.imdecode(npImage, 1)
+            # scan les qrcodes
+        success, res = recognition(matImage)
+        if success:
+            for bot in res:
+                if bot not in self.bots_found:
+                    self.bots_found.append(bot)
+                    #send to lobby:
+                    self.cat_publisher.put(str(bot))
+                    if len(self.bots_found) >= 2:
+                        self.searching = False
+                        print("[INFO] Found every robot")
+            
+
+    def cat_move(self):
+        #TODO
+        pass
 
     ## Getters
     def get_x(self) -> float :
