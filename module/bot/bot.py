@@ -11,7 +11,7 @@ import numpy
 import math
 
 ROUTER_ADDRESS = ['tcp/192.168.13.1:7447']
-ZTURTLE_PATH = "/home/pi/zenoh-demos/turtlebot3/zdrive-python/zdrive.py"
+ZTURTLE_PATH = "/home/pi/zenoh-demos/turtlebot3/zturtle-python"
 ZLIDAR_PATH = "/home/pi/zenoh-demos/turtlebot3/zlidar-rust/target/release/zlidar"
 
 class Bot :
@@ -72,7 +72,7 @@ class Bot :
         ## Run zturtle, cam is at bot/id/cams/0
         print("[INFO] Starting Zturtle")
         print("[INFO] Listening on prefix {}".format(self.cmd_subscriber_key))
-        os.system("python3 {} -p {} -e {} ".format(ZTURTLE_PATH, self.cmd_subscriber_key, "endpoints.json"))
+        os.system("python3 {}/zturtle.py -p {} -e {}/endpoints.json ".format(ZTURTLE_PATH, self.cmd_subscriber_key, ZTURTLE_PATH))
 
         ## Run zlidar
         print("[INFO] Starting zlidar")
