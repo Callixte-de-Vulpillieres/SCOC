@@ -174,13 +174,15 @@ class Controller :
 
     ## Treatements
     def mouse(self) :
+        self.cmd_pub = self.session.declare_publisher("bot/{}/cmd_vel".format(self.bot))
         self.elapsed = time.time() - self.start
         self.score = []
         print("[INFO] Moving")
         while self.elapsed < self.duration :
             self.to_scan = False
-            next_moves = decidemove(self.elapsed, 0.9, 120, (self.get_x(), self.get_y()),20,self.lidar.draft_map, 1, 150, self.score, 10,5,1,10)
+            next_moves = decidemove(self.elapsed, 0.9, 120, (self.get_x(), self.get_y()),20,self.lidar.draft_map.points, 1, 150, self.score, 10,5,1,10)
             print("[INFO] Next moves", next_moves)
+            print("’[INFO] Publishing on {}".format(self.cmd_pub.key_expr))
             self.move_path(next_moves)
             self.to_scan = True
             time.sleep(1)
