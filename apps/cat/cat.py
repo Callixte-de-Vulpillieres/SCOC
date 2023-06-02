@@ -39,17 +39,18 @@ zenoh = Zenoh()
 session = zenoh.open()
 publisher = session.declare_publisher("/lobby")
 
-def moving(bot: Controller, map,position,pas,max_retry=10):
+def moving(bot: Controller, map,position,stp,horizon,max_retry=10):
     """
     bot: Objet de la classe controller
     map: carte discète des murs
     position : [x,y] position du robot
-    pas: nombre de cases dont le robot se déplace avant de refaire un scan
+    stp: nombre de cases dont le robot se déplace avant de refaire un scan
     max_rety: nombre de retry si le chemin n'est pas accessible
     """
+    pas=min(stp, horizon)
     x,y=position
     for i in range(max_retry):
-        a,b= randrange(max(0,x-pas),min(a,x+pas)),randrange(max(0,y-pas),min(a,y+pas))
+        a,b= randrange(max(0,x-pas),min(a,min(x+pas))),randrange(max(0,y-pas),min(a,y+pas))
         if hiding.find_path(map,position,[a,b]) !=None:
             bot.move_path(hiding.find_path(map,position,[a,b])[:pas])
             break
