@@ -155,6 +155,7 @@ class Controller :
         self.linear_vel = 20
         currentAngle = self.get_angle()
         pub_twist((direction - currentAngle) * self.angular_vel, 0.0,self.session, self.cmd_pub.key_expr)
+        time.sleep(1)
         pub_twist(0.0, length*self.linear_vel , self.session, self.cmd_pub.key_expr)
         print("[INFO] Publishing twist on {}".format(self.cmd_pub.key_expr))
         self.slave_x=self.slave_x + length * math.cos(direction)
