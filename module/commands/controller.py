@@ -152,9 +152,10 @@ class Controller :
         currentAngle = self.get_angle()
         pub_twist((direction - currentAngle) * self.angular_vel, 0.0, self.cmd_pub)
         pub_twist(0.0, length * self.linear_vel, self.cmd_pub)
-        self.position.x=self.position.x + length * math.cos(direction)
-        self.position.y=self.position.y + length * math.sin(direction)
-    
+        self.slave_x=self.slave_x + length * math.cos(direction)
+        self.slave_y=self.slave_y + length * math.sin(direction)
+        self.slave_angle += direction
+
     def move_path(self,path):
         for i,el in enumerate(path[:-1]):
             match path[i+1][0] - path[i][0] :
