@@ -14,6 +14,7 @@ from module.hiding.hiding import decidemove
 import numpy
 import cv2
 import os
+from PIL import Image
 # setting path for qrcode recognition
 qrcode_recognition_path = os.path.abspath('../../module/recognition/qrcode_recognition')
 commands_path = os.path.abspath('../../module/commands')
@@ -106,7 +107,7 @@ class Controller :
         print("[INFO] Starting subscribers")
         self.ins_count = 0
         lobby_instruction_subscriber = self.session.declare_subscriber("controller", self.handle_instruction)
-        self.lidar = Lidar((self.x_max, self.y_max), self)
+        self.lidar = Lidar((200,200), self)
         ## Lidar handles lidar subscriber, directly generates map
         lidar_subscriber = self.session.declare_subscriber("bot/{}/lidar".format(self.bot), self.lidar.handle)
         while True :
@@ -124,6 +125,7 @@ class Controller :
             print("[INFO] Starting")
             if self.type == "mouse" :
                 self.mouse()
+        
             
 
     ## Protocol methods
@@ -170,24 +172,24 @@ class Controller :
                         case 0 :
                             self.move(0,-1)
                         case -1 :
-                            self.move(-90,1)
+                            self.move(-1,1)
                 case -1 :
                     match path[i+1][1] - path[i][1] :
                         case 1 :
-                            self.move(90,1)
+                            self.move(1,1)
                         case 0 :
-                            self.move(-90,1)
+                            self.move(-1,1)
                         case -1 :
-                            self.move(-90,1)
+                            self.move(-1,1)
 
                 case 0 :
                     match path[i+1][1] - path[i][1] :
                         case 1 :
-                            self.move(90,1)
+                            self.move(1,1)
                         case 0 :
-                            self.move(-90,1)
+                            self.move(-1,1)
                         case -1 :
-                            self.move(-90,1)
+                            self.move(-1,1)
             time.sleep(1)
 
     ## Treatements
@@ -198,14 +200,27 @@ class Controller :
         self.elapsed = time.time() - self.start
         self.score = []
         print("[INFO] Moving")
+        i = 0
+        self.to_scan =True
+        time.sleep(1)
+        img = Image.fromarray(self.lidar.draft_map.points)
+        new_p = img.convert('RGB')
+        new_p.save("init.jpeg")
+        self.to_scan= False
         while self.elapsed < self.duration :
             self.to_scan = False
+            print("[INFO] Beginning scan")
             next_moves = decidemove(self.elapsed, 0.9, 120, (self.get_x(), self.get_y()),20,self.lidar.draft_map.points, 1, 150, self.score, 10,5,1,10)
+            print("[INFO] Scan ended")
             print("[INFO] Next moves", next_moves)
             print("’[INFO] Publishing on {}".format(self.cmd_pub.key_expr))
             self.move_path(next_moves)
-            self.to_scan = True
-            time.sleep(1)
+            self.to_scan = True 
+            img = Image.fromarray(self.lidar.draft_map.points)
+            new_p = img.convert('RGB')
+            new_p.save("{}.jpeg".format(i))
+            i += 1
+
 
     def cat(self) :
         self.cat_publisher = self.session.declare_publisher(self.cat_publisher_key)

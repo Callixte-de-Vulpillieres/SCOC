@@ -6,6 +6,7 @@ import json
 import time
 
 class Parent :
+    to_scan = True
     def __init__(self) -> None:
         pass
 
@@ -27,7 +28,7 @@ conf = zenoh.Config()
 conf.insert_json5(zenoh.config.CONNECT_KEY, json.dumps(ROUTER_ADDRESS))
 session = zenoh.open(conf)
 
-a = session.declare_subscriber("rt/turtle1/lidar", l.handle)
+a = session.declare_subscriber("bot/1/lidar", l.handle)
 time.sleep(3)
 
 l.draft_map.show()

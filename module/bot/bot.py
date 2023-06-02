@@ -77,7 +77,7 @@ class Bot :
         ## Run zlidar
         print("[INFO] Starting zlidar")
         lidar_publisher_key = "bot/{}/lidar".format(self.uid)
-        os.system(" {} -e {} -k {} > /dev/null".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
+        os.system(" /home/pi/zenoh-demos/turtlebot3/zlidar-rust/target/release/zlidar -e tcp/192.168.13.1:7447 -k bot/{}/lidar".format(self.uid))
 
         # Init subscribers
         cmd = zenoh

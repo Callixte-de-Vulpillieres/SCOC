@@ -9,7 +9,7 @@ import numpy as np
 import time
 import sys
 
-sys.path.insert(0,'..')
+sys.path.insert(0,'../..')
 from module.context.map import DraftMap
 
 @cdr
@@ -42,7 +42,7 @@ class LaserScan:
 class Lidar :
     angles = []
     step : float
-    def __init__(self, dim : tuple, parent, step = 0.01, threshold : float = 10, horizon : float = 0.5, closerizon : float = 0.05) -> None:
+    def __init__(self, dim : tuple, parent, step = 0.01, threshold : float = 1024, horizon : float = 0.5, closerizon : float = 0.05) -> None:
         self.angles = np.linspace(-math.pi/2, 3*math.pi/2 - 2*math.pi/360, 360)
         self.threshold = threshold
         self.draft_map = DraftMap(dim[0], dim[1],step)
@@ -61,6 +61,7 @@ class Lidar :
                     self.draft_map.draw(math.cos(angle + self.parent.get_angle())*distance, math.sin(angle + self.parent.get_angle()) * distance, self.parent.get_x(), self.parent.get_y())
                     
             #self.draft_map.show()
+            
 
 
 

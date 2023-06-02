@@ -16,8 +16,9 @@ step=grille/range_scan
 def find_path(maze, st, go):
     start=tuple(st)
     goal=tuple(go)
+    print(start, goal)
     # Vérifier si les points de départ et d'arrivée sont valides
-    if maze[start[0]][start[1]] == 1 or maze[goal[0]][goal[1]] == 1:
+    if maze[int(start[0])][int(start[1])] == 1 or maze[int(goal[0])][int(goal[1])] == 1:
         return None
 
     # Dimensions du labyrinthe
@@ -30,13 +31,13 @@ def find_path(maze, st, go):
 
     # Fonction de coût du chemin jusqu'à un point donné
     def cost(point):
-        return maze[point[0]][point[1]]
+        return maze[int(point[0])][int(point[1])]
 
     # Liste des voisins d'un point donné
     def neighbors(point):
         row, col = point
         candidates = [(row-1, col), (row+1, col), (row, col-1), (row, col+1)]
-        return [(r, c) for r, c in candidates if 0 <= r < rows and 0 <= c < cols and maze[r][c] == 0]
+        return [(r, c) for r, c in candidates if 0 <= r < rows and 0 <= c < cols and maze[int(r),int(c)] == 0]
 
     # Initialisation des structures de données
     open_set = []
@@ -176,6 +177,7 @@ def decidemove(time, origin, tau ,position, nombre_points, densite, step, scanni
             if not dejavu:
                 score.append([score_cachette(densite, point, step , seuil, nombre_points,taille,position)]+list(point))
         score.sort()
+        print(score)
         return find_path(densite,position,score[-1][1:])[:case_step]
 if __name__== '__main__':
     testmap= [[1+0.1*k,1] for k in range (100)]
