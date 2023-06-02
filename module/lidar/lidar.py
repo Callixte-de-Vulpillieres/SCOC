@@ -10,7 +10,7 @@ import time
 import sys
 
 sys.path.insert(0,'..')
-from context.map import DraftMap
+from module.context.map import DraftMap
 
 @cdr
 class Time:

@@ -6,21 +6,22 @@ from zenoh import Sample
 import time
 import sys
 sys.path.insert(0, '..')
-from lidar.lidar import Lidar
+from module.lidar.lidar import Lidar
 import math
 from pycdr import cdr
 from pycdr.types import int8, int32, uint32, float64
-from hiding.hiding import decidemove
+from module.hiding.hiding import decidemove
 import numpy
 import cv2
-from qrcode_scanner import *
-from commands import *
-import hiding.hiding
+import os
 # setting path for qrcode recognition
-qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
+qrcode_recognition_path = os.path.abspath('../../module/recognition/qrcode_recognition')
 commands_path = os.path.abspath('../../module/commands')
 sys.path.append(qrcode_recognition_path)
 sys.path.append(commands_path)
+from qrcode_scanner import *
+from module.commands import *
+import module.hiding.hiding
 
 ROUTER_ADDRESS = ['tcp/192.168.13.1:7447']
 CONFIG = {
@@ -46,7 +47,7 @@ class Controller :
 
     cmd_pub : zenoh.Publisher
 
-    lidar : lidar.lidar.Lidar
+    lidar : Lidar
     info : dict = {}
 
     elapsed : float
