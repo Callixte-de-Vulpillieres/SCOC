@@ -10,7 +10,6 @@ from lidar.lidar import Lidar
 import math
 from pycdr import cdr
 from pycdr.types import int8, int32, uint32, float64
-from astar import *
 from hiding.hiding import decidemove
 import numpy
 import cv2
