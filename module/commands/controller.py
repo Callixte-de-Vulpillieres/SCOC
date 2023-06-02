@@ -124,8 +124,7 @@ class Controller :
             print("[INFO] Starting")
             if self.type == "mouse" :
                 self.mouse()
-            if self.type == "cat" :
-                self.cat()
+            
 
     ## Protocol methods
     def handshake_lobby_handler(self, sample : Sample) :
