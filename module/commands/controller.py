@@ -149,15 +149,19 @@ class Controller :
 
     ## Move commands
     def move(self,direction,length):
+        self.angular_vel = 200
+        self.linear_vel = 20
         currentAngle = self.get_angle()
-        pub_twist((direction - currentAngle) * self.angular_vel, 0.0, self.cmd_pub)
-        pub_twist(0.0, length * self.linear_vel, self.cmd_pub)
+        pub_twist((direction - currentAngle) * self.angular_vel/100, 0.0,self.session, self.cmd_pub.key_expr)
+        pub_twist(0.0, length*self.linear_vel , self.session, self.cmd_pub.key_expr)
+        print("[INFO] Publishing twist on {}".format(self.cmd_pub.key_expr))
         self.slave_x=self.slave_x + length * math.cos(direction)
         self.slave_y=self.slave_y + length * math.sin(direction)
-        self.slave_angle += direction
+        self.slave_angle = (self.slave_angle + 360)%360
 
     def move_path(self,path):
         for i,el in enumerate(path[:-1]):
+            print(path[i+1][0] - path[i][0])
             match path[i+1][0] - path[i][0] :
                 case 1 :
                     match path[i+1][1] - path[i][1] :
@@ -165,16 +169,32 @@ class Controller :
                             self.move(0, 1)
                         case 0 :
                             self.move(0,-1)
+                        case -1 :
+                            self.move(-90,1)
                 case -1 :
                     match path[i+1][1] - path[i][1] :
                         case 1 :
                             self.move(90,1)
                         case 0 :
                             self.move(-90,1)
+                        case -1 :
+                            self.move(-90,1)
+
+                case 0 :
+                    match path[i+1][1] - path[i][1] :
+                        case 1 :
+                            self.move(90,1)
+                        case 0 :
+                            self.move(-90,1)
+                        case -1 :
+                            self.move(-90,1)
+            time.sleep(1)
 
     ## Treatements
     def mouse(self) :
         self.cmd_pub = self.session.declare_publisher("bot/{}/cmd_vel".format(self.bot))
+        print("[INFO] Test froward move...")
+        self.move(0,1)
         self.elapsed = time.time() - self.start
         self.score = []
         print("[INFO] Moving")
@@ -248,12 +268,12 @@ class Controller :
     def get_angle(self) -> float :
         return self.slave_angle
 
-
+@cdr
 class Vector3:
     x: float64
     y: float64
     z: float64
-
+@cdr
 class Twist:
     linear: Vector3
     angular: Vector3
@@ -286,11 +306,11 @@ def clean_map(map,size):
 
 
 
-def pub_twist(linear, angular, publisher):
+def pub_twist(linear, angular, session : zenoh.Session, key  :str):
     print("Pub twist: {} - {}".format(linear, angular))
     t = Twist(linear=Vector3(x=linear, y=0.0, z=0.0),
                 angular=Vector3(x=0.0, y=0.0, z=angular))
-    publisher.put("", t.serialize())  
+    session.put(key,t.serialize())  
 
 
 if __name__ == "__main__" :
