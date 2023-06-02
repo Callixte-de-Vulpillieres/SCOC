@@ -2,10 +2,12 @@
 import time
 import cv2
 from qrcode_scanner import *
-from commands import *
-
+from module.commands import controller as cmd
+from cmd import Controller
+from module.hiding import hiding
+from random import randrange
 import sys
-import os 
+import os
 from math import pi
 from zenoh import Zenoh, ZenohSession
 
@@ -37,10 +39,23 @@ zenoh = Zenoh()
 session = zenoh.open()
 publisher = session.declare_publisher("/lobby")
 
-def move():
-    print("moving")
+def moving(bot: Controller, map,position,pas,max_retry=10):
+    """
+    bot: Objet de la classe controller
+    map: carte discète des murs
+    position : [x,y] position du robot
+    pas: nombre de cases dont le robot se déplace avant de refaire un scan
+    max_rety: nombre de retry si le chemin n'est pas accessible
+    """
+    x,y=position
+    for i in range(max_retry):
+        a,b= randrange(max(0,x-pas),min(a,x+pas)),randrange(max(0,y-pas),min(a,y+pas))
+        if hiding.find_path(map,position,[a,b]) !=None:
+            bot.move_path(hiding.find_path(map,position,[a,b])[:pas])
+            break
+    return None
 
-def turn_around(angle ):
+def turn_around(bot: Controller, angle ):
     print("turning",angle)
 
 while searching:
@@ -58,18 +73,18 @@ while searching:
                     cam.release()
     time.sleep(1/fps)
     print(bots_found)
-    
+
     #tourner chaque "looking_time" secondes
     if time.time()> start_time + looking_time:
         start_time = time.time()
         turn_around(angle)
         nb += 1
-    
+
     #se bouger le cul apres avoir fait le tour
     if nb*angle >= 2*pi:
         nb = 0
-        move()
-        
+        moving(self, map )
+
 session.close()
 zenoh.shutdown()
 
