@@ -152,7 +152,7 @@ class Controller :
         self.angular_vel = 200
         self.linear_vel = 20
         currentAngle = self.get_angle()
-        pub_twist((direction - currentAngle) * self.angular_vel/100, 0.0,self.session, self.cmd_pub.key_expr)
+        pub_twist((direction - currentAngle) * self.angular_vel, 0.0,self.session, self.cmd_pub.key_expr)
         pub_twist(0.0, length*self.linear_vel , self.session, self.cmd_pub.key_expr)
         print("[INFO] Publishing twist on {}".format(self.cmd_pub.key_expr))
         self.slave_x=self.slave_x + length * math.cos(direction)
@@ -306,7 +306,7 @@ def clean_map(map,size):
 
 
 
-def pub_twist(linear, angular, session : zenoh.Session, key  :str):
+def pub_twist(angular, linear, session : zenoh.Session, key  :str):
     print("Pub twist: {} - {}".format(linear, angular))
     t = Twist(linear=Vector3(x=linear, y=0.0, z=0.0),
                 angular=Vector3(x=0.0, y=0.0, z=angular))

@@ -72,7 +72,7 @@ class Bot :
         ## Run zturtle, cam is at bot/id/cams/0
         print("[INFO] Starting Zturtle")
         print("[INFO] Listening on prefix {}".format(self.cmd_subscriber_key))
-        os.system("python3 {}/zturtle.py -p {} -e {}/endpoints.json ".format(ZTURTLE_PATH, self.cmd_subscriber_key, ZTURTLE_PATH))
+        os.system("python3 {}/zturtle.py -p {} -e {}/endpoints.json & ".format(ZTURTLE_PATH, self.cmd_subscriber_key, ZTURTLE_PATH))
 
         ## Run zlidar
         print("[INFO] Starting zlidar")
