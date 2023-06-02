@@ -15,7 +15,7 @@ import numpy
 import cv2
 from qrcode_scanner import *
 from commands import *
-
+import hiding.hiding
 # setting path for qrcode recognition
 qrcode_recognition_path = os.path.abspath('../../module/bot-recognition/qrcode_recognition')
 commands_path = os.path.abspath('../../module/commands')
@@ -213,9 +213,27 @@ class Controller :
                         print("[INFO] Found every robot")
             
 
-    def cat_move(self):
-        #TODO
-        pass
+    def moving(self):
+        """
+        bot: Objet de la classe controller
+        map: carte discète des murs
+        position : [x,y] position du robot
+        stp: nombre de cases dont le robot se déplace avant de refaire un scan
+        max_rety: nombre de retry si le chemin n'est pas accessible
+        """
+        map = self.lidar.draft_map
+        position = (self.get_x(), self.get_y())
+        stp = 40
+        horizon = 40
+        max_retry = 10
+        pas=min(stp, horizon)
+        x,y=position
+        for i in range(max_retry):
+            a,b= numpy.randrange(max(0,x-pas),min(a,min(x+pas))),numpy.randrange(max(0,y-pas),min(a,y+pas))
+            if hiding.find_path(map,position,[a,b]) !=None:
+                self.move_path(hiding.find_path(map,position,[a,b])[:pas])
+                break
+        return None
 
     ## Getters
     def get_x(self) -> float :
