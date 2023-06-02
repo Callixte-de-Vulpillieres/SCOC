@@ -26,7 +26,7 @@ class Bot :
 
 
     def __init__(self, uid : str) -> None:
-        self.cmd_subscriber_key = "bot/{}/".format(uid)
+        self.cmd_subscriber_key = "bot/{}".format(uid)
         self.lobby_connected = False
         self.controller_connected = False
         self.controller = ""
@@ -76,7 +76,7 @@ class Bot :
         ## Run zlidar
         print("[INFO] Starting zlidar")
         lidar_publisher_key = "bot/{}/lidar".format(self.uid)
-        os.system(" {} -e {} -k {}".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
+        os.system(" {} -e {} -k {} &".format(ZLIDAR_PATH, ROUTER_ADDRESS, lidar_publisher_key))
 
         # Init subscribers
         cmd = zenoh
